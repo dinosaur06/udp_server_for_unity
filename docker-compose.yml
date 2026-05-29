@@ -1,0 +1,55 @@
+version: '3.8'
+
+networks:
+  sim-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24  # 명시적 서브넷 (공격 시뮬레이터 IP 제어용)
+
+volumes:
+  db_data:
+
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: sim-server
+    networks:
+      sim-network:
+        ipv4_address: 172.20.0.10
+    ports:
+      - "9000:9000/udp"
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+    ulimits:
+      nofile:           # epoll 파일 디스크립터 한도 증가
+        soft: 65536
+        hard: 65536
+
+  mariadb:
+    image: mariadb:latest
+    container_name: sim-mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: fortress_db
+    networks:
+      sim-network:
+        ipv4_address: 172.20.0.20
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: unless-stopped
+
+  attacker:
+    image: ubuntu:22.04
+    container_name: sim-attacker
+    command: tail -f /dev/null
+    networks:
+      sim-network:
+        ipv4_address: 172.20.0.30  # 고정 IP → RateLimiter 테스트에 활용
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
