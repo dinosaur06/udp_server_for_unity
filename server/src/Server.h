@@ -1,6 +1,6 @@
 #pragma once
 // Server.h
-#pragma once
+#include <netinet/in.h>  // ← 이거 추가
 
 class Server {
 public:
