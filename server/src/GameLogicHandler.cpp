@@ -54,7 +54,8 @@ void GameLogicHandler::HandleConnectReq(const PacketHeader& hdr,
     }
 
     Session* session = SessionManager::Get().CreateSession(from);
-    std::strncpy(session->playerName, req->playerName, 31);
+    std::strncpy(session->playerName, req->playerName, sizeof(session->playerName) - 1);
+    session->playerName[sizeof(session->playerName) - 1] = '\0';
     session->state = SessionState::ACTIVE;
 
     // 스폰 위치 (고정 or 랜덤으로 확장 가능)

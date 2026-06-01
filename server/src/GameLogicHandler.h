@@ -14,6 +14,9 @@ public:
     void HandlePlayerMove(const PacketHeader& hdr, const char* payload, int sock, const sockaddr_in& from);
     void HandlePlayerShoot(const PacketHeader& hdr, const char* payload, int sock, const sockaddr_in& from);
 
+    // 월드 스냅샷 생성 및 브로드캐스트
+    void BroadcastWorldSnapshot(int sock);
+
 private:
     GameLogicHandler() = default;
 
@@ -24,9 +27,6 @@ private:
     // 모든 ACTIVE 세션에 브로드캐스트
     void Broadcast(int sock, PacketType type,
         const void* payload, size_t payloadLen, uint32_t excludeId = 0);
-
-    // 월드 스냅샷 생성 및 브로드캐스트
-    void BroadcastWorldSnapshot(int sock);
 
     uint32_t seqCounter_ = 0;
 };
